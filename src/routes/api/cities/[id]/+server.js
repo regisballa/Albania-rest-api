@@ -34,3 +34,41 @@ export async function GET({ params }) {
 
     return Response.json(rows[0], { status: 200 });
 }
+
+export async function PUT({ params, request }) {
+
+    if (!checkAuth(request)) {
+        return Response.json(
+            { message: 'Unauthorized' },
+            { status: 401 }
+        );
+    }
+
+    const { id } = params;
+
+    const { name, location, type, population, height } = await request.json();
+
+    if (!name || !location || !type) {
+        return Response.json(
+            { message: 'Missing required fields' },
+            { status: 400 }
+        );
+    }
+
+    const [result] = await pool.query(
+        `UPDATE cities SET name = ?, location = ?, type = ?, population = ?, height = ? WHERE id = ?`,
+        [name, location, type, population, height, id]
+    );
+
+    if (result.affectedRows === 0) {
+        return Response.json(
+            { message: 'City not found' },
+            { status: 404 }
+        );
+    }
+
+    return Response.json(
+        { message: 'City updated successfully' },
+        { status: 200 }
+    );
+}

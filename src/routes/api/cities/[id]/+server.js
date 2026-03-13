@@ -15,3 +15,22 @@ function checkAuth(request) {
 
     return user === API_USER && pass === API_PASSWORD;
 }
+
+export async function GET({ params }) {
+
+    const { id } = params;
+
+    const [rows] = await pool.query(
+        'SELECT * FROM cities WHERE id = ?',
+        [id]
+    );
+
+    if (rows.length === 0) {
+        return Response.json(
+            { message: 'City not found' },
+            { status: 404 }
+        );
+    }
+
+    return Response.json(rows[0], { status: 200 });
+}
